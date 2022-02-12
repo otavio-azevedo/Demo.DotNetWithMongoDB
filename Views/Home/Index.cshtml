@@ -1,0 +1,110 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div style="height:100vh;">
+    <div id="panel-localiza-aeroporto" style="margin-top:50px;" class="col-md-offset-1 col-md-3">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <div class="panel-title">Airports Near You</div>
+            </div>
+            <!--.panel-heading-->
+            <div style="padding-top:30px" class="panel-body">
+                <form action="/Home/Search" id="form-localiza-aeroporto" class="form-horizontal" role="form" method="post">
+
+                    <div style="margin-bottom: 25px; width: 100%;" class="input-group">
+                        <label for="localizacao-endereco">Address:</label>
+                        <input id="localizacao-endereco" type="text" class="form-control" name="address"
+                            value="Miami, Florida" placeholder="Where are you now?" required>
+                    </div>
+
+                    <div style="margin-bottom: 25px" class="input-group">
+                        <label for="localizacao-distancia">Distance:</label>
+                        <input id="localizacao-distancia" type="number" step="250" name="distance"
+                            class="form-control text-center" value="50" min="0" max="20000">
+                    </div>
+
+                    <div style="margin-bottom: 25px" class="input-group">
+                        <label for="localizacao-tipoaeroporto">Airport Type:</label>
+                        <select id="localizacao-tipoaeroporto" name="type" class="form-control">
+                            <option value="0">All</option>
+                            <option value="1">Municipal</option>
+                            <option value="2">International</option>
+                        </select>
+                    </div>
+
+                    <div style="margin-top:10px" class="form-group">
+                        <div class="col-sm-12 controls">
+                            <a onclick="localizar();" class="btn btn-primary">Search!</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <!--.panel-body-->
+        </div>
+        <!--.panel-->
+    </div>
+    <!--#panel-localiza-aeroporto-->
+    <div class="col-md-8" style="height: 100%; padding: 50px;">
+        <div id="mapa_canvas">
+
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript"
+            src="http://maps.googleapis.com/maps/api/js?key=AIzaSyDfYaswgGQytvJJxRIXdw99o0eUZFml6LM">
+    </script>
+    <script type="text/javascript" language="javascript">
+
+        function renderMap(coords) {
+
+            var location = new google.maps.LatLng(coords[0].Latitude, coords[0].Longitude);
+
+            var mapCanvas = document.getElementById('mapa_canvas');
+            var mapOptions = {
+                center: location,
+                zoom: 11,
+                panControl: false,
+                mapTypeId: google.maps.MapTypeId.ROADMAP
+            }
+            var map = new google.maps.Map(mapCanvas, mapOptions);
+            $(mapCanvas).height("100%");
+
+            var localMarker = new google.maps.Marker({
+                //label: { text: coords[0].Nome },
+                position: location,
+                map: map,
+                icon: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png'
+            });
+            map.setCenter(location);
+
+            for (var i = 1; i < coords.length; i++) {
+                var marker = new google.maps.Marker({
+                    //label: { text: coords[i].Nome },
+                    position: new google.maps.LatLng(coords[i].Latitude, coords[i].Longitude),
+                    map: map,
+                    icon: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png'
+                });
+            }
+
+        }
+
+        function localizar() {
+            console.log("Search airports...");
+            $.post(
+                url = "/Home/Search",
+                data = {
+                    address: $("#localizacao-endereco").val(),
+                    distance: $("#localizacao-distancia").val(),
+                    type: $("#localizacao-tipoaeroporto").val(),
+                },
+                sucess = function (response) {
+                    console.log(response);
+                    renderMap(response);
+                }
+            );
+        }
+
+    //google.maps.event.addDomListener(window, 'load', renderMap);
+    </script>

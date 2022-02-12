@@ -1,0 +1,1 @@
+mongorestore --db db-geo /geo-dump
